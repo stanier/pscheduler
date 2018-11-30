@@ -1,0 +1,118 @@
+#
+# Vagrant Configuration for pScheduler Development System
+#
+
+# Prerequisites:
+#  vagrant plugin install vagrant-vbguest
+#  sudo gem install netaddr
+
+# NOTE:  Configure this VM in config.yaml
+
+# ------------------------------------------------------------------------------
+
+# No user-serviceable parts beyond this point.
+
+#require 'ipaddress'
+require 'yaml'
+
+
+
+
+config_file = File.join(File.dirname(__FILE__), 'config.yaml')
+config = YAML.load_file(File.open(config_file))
+
+#private_net = IPAddress config["private_network"]
+#machine_number = config["host_number"]
+
+#machine_name = "dev#{machine_number}"
+#machine_private_ip = private_net.hosts[machine_number - 1]
+
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "centos/7"
+
+  config.vm.synced_folder ".", "/vagrant", type: "rsync", disabled: true
+  config.vm.synced_folder "build", "/build", type: "rsync", disabled: false
+
+  #
+  # VirtualBox
+  #
+
+  config.vm.provider "virtualbox" do |vb|  
+
+    vb.name = "pScheduler #{machine_name}"
+    vb.cpus = 2
+    vb.memory = 4096
+
+    config.vbguest.auto_update = true
+    config.vbguest.no_remote = false
+
+  end
+
+  #
+  # Hostname and Network
+  #
+
+  config.vm.network "private_network", ip: machine_private_ip
+
+
+
+  #
+  # Basic Setup
+  #
+
+  config.vm.provision "shell", run: "once", inline: <<-SHELL
+
+    # TODO: System setup
+
+  SHELL
+
+  # ----------------------------------------------------------------------------
+
+  #
+  # User Account and Shared Home Directory
+  #
+
+  require 'etc'
+
+  pwent = Etc.getpwnam(Etc.getlogin)
+
+  new_login = pwent.name
+  new_uid   = pwent.uid
+  new_gid   = pwent.uid   # Intentionally the same
+  new_gecos = pwent.gecos
+  new_home  = pwent.dir
+  new_shell = pwent.shell
+
+  config.vm.provision "shell", run: "once", inline: <<-SHELL
+
+    echo "Adding account and group for #{new_gecos}:"
+
+    groupadd --gid "#{new_gid}" "#{new_login}"
+
+    useradd \
+        --comment "#{new_gecos}" \
+        --gid "#{new_gid}" \
+        --home-dir "#{new_home}" \
+        --no-create-home \
+        --shell "#{new_shell}" \
+        --uid "#{new_uid}" \
+        "#{new_login}"
+
+    mkdir -p "#{new_home}"
+    chwon -R "#{new_uid}.#{new_gid}" "${new_home}"
+
+    id "#{new_login}"
+
+  SHELL
+
+  config.vm.provider "virtualbox" do |vb|  
+    config.vm.synced_folder new_home, new_home, type: "virtualbox",
+      mount_options: ["uid=#{new_uid}", "gid=#{new_gid}"]
+  end
+
+end
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :

@@ -1,0 +1,10 @@
+#
+# pScheduler Dev Host Configuration
+#
+
+# Private network used by the dev machines
+private_network: 10.0.0.0/24
+
+# Machine number.  This must be within the number of usable hosts in
+# private_network (e.g., 1-254 for a /24).
+host_number: 6

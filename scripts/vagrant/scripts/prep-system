@@ -1,0 +1,42 @@
+#!/bin/sh -e
+#
+
+# Install Repositories
+
+
+# PostgreSQL
+yum -y install "https://download.postgresql.org/pub/repos/yum/9.5/redhat/rhel-${REDHAT_RELEASE_MAJOR}Server-$(uname -m)/pgdg-centos95-9.5-3.noarch.rpm"
+
+# EPEL
+yum -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${REDHAT_RELEASE_MAJOR}.noarch.rpm"
+
+# perfSONAR
+
+# Current version number of perfSONAR repos
+PS_REPO_VERSION=0.8-1
+REPO_PREFIX="http://software.internet2.edu/rpms/el${REDHAT_RELEASE_MAJOR}/$(uname -m)/main/RPMS/perfSONAR-repo"
+for REPO in "" extras staging
+do
+    [ "$REPO" != "" ] && REPO="${REPO}-"
+    yum -y install "${REPO_PREFIX}-${REPO}${PS_REPO_VERSION}.noarch.rpm"
+done
+
+
+# Things we need to build:
+yum -y install \
+    git \
+    m4 \
+    make \
+    which
+
+
+# Conveniences
+yum -y install \
+    bind-utils \
+    emacs-nox \
+    ntp \
+    pylint \
+    screen \
+    tcsh \
+    tree \
+    wget
