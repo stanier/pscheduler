@@ -1,39 +1,80 @@
 #
 # Vagrant Configuration for pScheduler Development System
 #
-
+#
 # Prerequisites:
 #  vagrant plugin install vagrant-vbguest
-#  sudo gem install netaddr
-
-# NOTE:  Configure this VM in config.yaml
+#  vagrant plugin install netaddr
+#
+#
+# Configure this VM in config.yaml
+#
 
 # ------------------------------------------------------------------------------
 
-# No user-serviceable parts beyond this point.
+#
+# Network
+#
 
-#require 'ipaddress'
+require 'netaddr'
 require 'yaml'
-
-
-
 
 config_file = File.join(File.dirname(__FILE__), 'config.yaml')
 config = YAML.load_file(File.open(config_file))
 
-#private_net = IPAddress config["private_network"]
-#machine_number = config["host_number"]
+# Networks
 
-#machine_name = "dev#{machine_number}"
-#machine_private_ip = private_net.hosts[machine_number - 1]
+private_net_v4 = NetAddr::IPv4Net.parse(config["private_network_v4"])
+private_net_v4_size = private_net_v4.len - 2
 
+private_net_v6 = NetAddr::IPv6Net.parse(config["private_network_v6"])
+private_net_v6_size = private_net_v6.len - 2
+
+if private_net_v6_size != private_net_v4_size
+   abort("IPv4 and IPv6 networks must be the same size")
+end
+
+machine_number = config["host_number"]
+if machine_number < 1 || machine_number > private_net_v4_size
+   abort("Invalid machine number; must be 1..#{private_net_v4_size}")
+end
+
+
+# Host Name and IPs
+
+machine_name = "dev#{machine_number}"
+machine_private_ip_v4 = private_net_v4.nth(machine_number)
+machine_private_ip_v6 = private_net_v6.nth(machine_number)
+
+
+# Host Table
+
+hosts_v4 = (1..private_net_v4_size).map {
+  |n| "#{private_net_v4.nth(n)} dev#{n}"
+}.join("\n")
+
+hosts_v6 = (1..private_net_v6_size).map {
+  |n| "#{private_net_v6.nth(n)} dev#{n}v6"
+}.join("\n")
+
+hosts = "\n# Private network hosts\n\n" + hosts_v4 + "\n" + hosts_v6
+
+
+
+# ------------------------------------------------------------------------------
+
+#
+# Vagrant
+#
 
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "centos/7"
+  redhat_release_major = 7
+  config.vm.box = "centos/#{redhat_release_major}"
+
 
   config.vm.synced_folder ".", "/vagrant", type: "rsync", disabled: true
-  config.vm.synced_folder "build", "/build", type: "rsync", disabled: false
+  config.vm.synced_folder "scripts", "/scripts", type: "rsync", disabled: true
 
   #
   # VirtualBox
@@ -54,8 +95,13 @@ Vagrant.configure("2") do |config|
   # Hostname and Network
   #
 
-  config.vm.network "private_network", ip: machine_private_ip
+  config.vm.network "private_network",
+    ip: machine_private_ip_v4.to_s,
+    netmask: private_net_v4.netmask.prefix_len.to_s
 
+  config.vm.network "private_network",
+    ip: machine_private_ip_v6.to_s,
+    netmask: private_net_v6.netmask.prefix_len.to_s
 
 
   #
@@ -64,7 +110,48 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", run: "once", inline: <<-SHELL
 
-    # TODO: System setup
+    cat >> /etc/hosts << EOF
+#{hosts}
+EOF
+
+    yum -y upgrade
+
+    # Everything below here is derived from /scripts/system-prep in
+    # the source tree.
+
+    # PostgreSQL
+    yum -y install "https://download.postgresql.org/pub/repos/yum/9.5/redhat/rhel-#{redhat_release_major}Server-$(uname -m)/pgdg-centos95-9.5-3.noarch.rpm"
+
+    # EPEL
+    yum -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-#{redhat_release_major}.noarch.rpm"
+
+    # perfSONAR
+    PS_REPO_VERSION=0.8-1
+    REPO_PREFIX="http://software.internet2.edu/rpms/el#{redhat_release_major}/$(uname -m)/main/RPMS/perfSONAR-repo"
+    for REPO in "" extras staging
+    do
+        [ "$REPO" != "" ] && REPO="${REPO}-"
+        yum -y install "${REPO_PREFIX}-${REPO}${PS_REPO_VERSION}.noarch.rpm"
+    done
+
+    # Things we need to build:
+    yum -y install \
+        git \
+        m4 \
+        make \
+        which
+
+    # Conveniences
+    yum -y install \
+        bind-utils \
+        emacs-nox \
+        ntp \
+        pylint \
+        screen \
+        tcsh \
+        tree \
+        wget
+
 
   SHELL
 
@@ -101,16 +188,16 @@ Vagrant.configure("2") do |config|
         "#{new_login}"
 
     mkdir -p "#{new_home}"
-    chwon -R "#{new_uid}.#{new_gid}" "${new_home}"
+    chown -R "#{new_uid}.#{new_gid}" "#{new_home}"
 
     id "#{new_login}"
 
   SHELL
 
-  config.vm.provider "virtualbox" do |vb|  
-    config.vm.synced_folder new_home, new_home, type: "virtualbox",
-      mount_options: ["uid=#{new_uid}", "gid=#{new_gid}"]
-  end
+  #config.vm.provider "virtualbox" do |vb|  
+  #  config.vm.synced_folder new_home, new_home, type: "virtualbox",
+  #    mount_options: ["uid=#{new_uid}", "gid=#{new_gid}"]
+  #end
 
 end
 

@@ -3,8 +3,9 @@
 #
 
 # Private network used by the dev machines
-private_network: 10.0.0.0/24
+private_network_v4: 10.0.0.0/28
+private_network_v6: fc00::/124
 
 # Machine number.  This must be within the number of usable hosts in
-# private_network (e.g., 1-254 for a /24).
-host_number: 6
+# private_network (e.g., 1-254 for an IPv4 /24).
+host_number: 4
