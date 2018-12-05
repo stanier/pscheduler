@@ -1,12 +1,6 @@
 #
 # Vagrant Configuration for pScheduler Development System
 #
-#
-# Prerequisites:
-#  vagrant plugin install vagrant-vbguest
-#  vagrant plugin install netaddr
-#
-#
 # Configure this VM in config.yaml
 #
 
@@ -72,14 +66,31 @@ Vagrant.configure("2") do |config|
   redhat_release_major = 7
   config.vm.box = "centos/#{redhat_release_major}"
 
+  config.vagrant.plugins = [
+                            "vagrant-reload",
+                            "vagrant-vbguest",
+                            "netaddr"
+                            ]
 
-  config.vm.synced_folder ".", "/vagrant", type: "rsync", disabled: true
-  config.vm.synced_folder "scripts", "/scripts", type: "rsync", disabled: true
+  config.vm.synced_folder ".", "/vagrant",   type: "rsync", disabled: true
+
+  #
+  # Early Update and Reboot
+  #
+  config.vm.provision "shell", run: "once", inline: <<-SHELL
+    UPDATED="/.updated"
+    if [ ! -e "${UPDATED}" ]
+    then
+        yum -y update
+        touch /.updated
+        reboot
+    fi
+  SHELL
+  
 
   #
   # VirtualBox
   #
-
   config.vm.provider "virtualbox" do |vb|  
 
     vb.name = "pScheduler #{machine_name}"
@@ -108,52 +119,22 @@ Vagrant.configure("2") do |config|
   # Basic Setup
   #
 
+
   config.vm.provision "shell", run: "once", inline: <<-SHELL
 
-    cat >> /etc/hosts << EOF
-#{hosts}
-EOF
+    hostname "#{machine_name}"
+    echo "#{machine_name}" > /etc/hostname
 
-    yum -y upgrade
-
-    # Everything below here is derived from /scripts/system-prep in
-    # the source tree.
-
-    # PostgreSQL
-    yum -y install "https://download.postgresql.org/pub/repos/yum/9.5/redhat/rhel-#{redhat_release_major}Server-$(uname -m)/pgdg-centos95-9.5-3.noarch.rpm"
-
-    # EPEL
-    yum -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-#{redhat_release_major}.noarch.rpm"
-
-    # perfSONAR
-    PS_REPO_VERSION=0.8-1
-    REPO_PREFIX="http://software.internet2.edu/rpms/el#{redhat_release_major}/$(uname -m)/main/RPMS/perfSONAR-repo"
-    for REPO in "" extras staging
-    do
-        [ "$REPO" != "" ] && REPO="${REPO}-"
-        yum -y install "${REPO_PREFIX}-${REPO}${PS_REPO_VERSION}.noarch.rpm"
-    done
-
-    # Things we need to build:
-    yum -y install \
-        git \
-        m4 \
-        make \
-        which
-
-    # Conveniences
-    yum -y install \
-        bind-utils \
-        emacs-nox \
-        ntp \
-        pylint \
-        screen \
-        tcsh \
-        tree \
-        wget
-
+    sed -e 's/^\s*//g' >> /etc/hosts << '    EOF'
+    #{hosts}
+    EOF
 
   SHELL
+
+  if false
+    config.vm.provision "shell", run: "once",
+      path: "build/prep-system", args: "#{redhat_release_major}"
+  end
 
   # ----------------------------------------------------------------------------
 
@@ -190,14 +171,34 @@ EOF
     mkdir -p "#{new_home}"
     chown -R "#{new_uid}.#{new_gid}" "#{new_home}"
 
+    ( sed -e 's/\s*#.*$//g; s/^\s*//; /^$/d' ) \
+        <<'    EOF' > /etc/sudoers.d/10-#{new_login}
+    # Allow #{new_gecos} to sudo with impunity
+    #{new_login} ALL= NOPASSWD:ALL
+    EOF
+
     id "#{new_login}"
 
   SHELL
 
-  #config.vm.provider "virtualbox" do |vb|  
-  #  config.vm.synced_folder new_home, new_home, type: "virtualbox",
-  #    mount_options: ["uid=#{new_uid}", "gid=#{new_gid}"]
-  #end
+
+###  config.vm.provider "virtualbox" do |vb|
+###
+###    home_shared_folder = "home-#{new_login}"
+###
+###    vb.customize [ "sharedfolder", "add", :id,
+###                   "--name", home_shared_folder,
+###                   "--hostpath", "#{new_home}" ]
+###
+###    config.vm.provision "shell", run: "once", inline: <<-SHELL
+###      mount -t vboxsf -o "uid=#{new_uid},gid=#{new_gid}" "#{home_shared_folder}" "#{new_home}"
+###    SHELL
+###
+###    # DO NOT USE THIS.  IT HAPPENS TOO EARLY.
+###    #config.vm.synced_folder new_home, new_home, type: "virtualbox",
+###    #  mount_options: ["uid=#{new_uid}", "gid=#{new_gid}"]
+###
+###  end
 
 end
 
