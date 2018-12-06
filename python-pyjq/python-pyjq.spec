@@ -49,7 +49,11 @@ Python bindings to JQ
 
 
 %build
-cython _pyjq.pyx
+
+#rpmbuild/BUILD/pyjq-2.1.0/MEMO.txt:We must run ``cython _pyjq.pyx`` before to run ``python setup.py xxx``.
+#rpmbuild/BUILD/pyjq-2.1.0/MEMO.txt:Of course, ``Cython.Build.cythonize`` enable to automatically compile .pyx to .c
+
+cythonize _pyjq.pyx
 python setup.py build
 
 

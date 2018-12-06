@@ -42,9 +42,9 @@ postgresql-init
 postgresql-load
 
 # Python Modules
+python-setuptools
 python-argparse
-# TODO: Drop this when we drop support for EL6.
-ifelse(REDHAT_RELEASE_MAJOR,6,Cython,)
+Cython
 ifelse(REDHAT_RELEASE_MAJOR,7,
     python-functools32,)
 python-isodate

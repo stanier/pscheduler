@@ -10,10 +10,12 @@
 %define run_check 0%{!?_without_check:1}
 ##%define run_check 0%{!?_with_check:0}
 
+%global __os_install_post %{nil}
+
 Name:		Cython
-Version:	0.19
+Version:	0.29.1
 ##Release:	4.b3%{?dist}
-Release:	3%{?dist}
+Release:	1%{?dist}
 Summary:	A language for writing Python extension modules
 
 %define upstreamversion %{version}
@@ -118,8 +120,7 @@ popd
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/cython
-%{_bindir}/cygdb
+%{_bindir}/*
 %{python_sitearch}/Cython
 %{python_sitearch}/cython.py*
 %{python_sitearch}/pyximport
@@ -128,15 +129,14 @@ popd
 %endif
 %if 0%{?with_python3}
 %files -n python3-Cython
-%doc *.txt Demos Doc Tools
+# %doc *.txt Demos Doc Tools
 %{python3_sitearch}/*
-%{_bindir}/cython3
-%{_bindir}/cygdb3
+%{_bindir}/cython*
 %if 0%{?fedora} >= 9 || 0%{?rhel} >= 6
 %{python3_sitearch}/Cython*egg-info
 %endif
 %endif # with_python3
-%doc *.txt Demos Doc Tools
+# %doc *.txt Demos Doc Tools
 
 
 %changelog
