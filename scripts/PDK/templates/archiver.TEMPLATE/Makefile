@@ -11,6 +11,3 @@ test::
 
 test-coverage::
 	nosetests --with-coverage --cover-package rabbitmq
-
-clean::
-	make -C tests $@
