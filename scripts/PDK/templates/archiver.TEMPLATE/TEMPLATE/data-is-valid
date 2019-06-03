@@ -22,6 +22,9 @@ data_validator = {
         #if you have more than one version of your archiver, you will need to
 	#include a "schema" property which describes the expected data format
 	#for the given version of your archiver
+	    "schema": {} #schema describes the data format of the archiver input parameters
+	    #it becomes important once multiple versions of the archiver exist with different possible parameters
+	    #make sure to include it
     },
     "additionalProperties": False,
     #include any required properties here
