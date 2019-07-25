@@ -95,6 +95,7 @@ random-string
 pscheduler-account
 pscheduler-jq-library
 python-pscheduler
+python-psesmond
 pscheduler-core
 pscheduler-server
 
