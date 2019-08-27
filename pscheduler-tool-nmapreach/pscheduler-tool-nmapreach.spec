@@ -24,6 +24,7 @@ Requires:	pscheduler-server
 Requires:	python-pscheduler
 Requires:	pscheduler-test-netreach
 Requires:	nmap
+Requires:       python-ipaddress
 
 BuildRequires:	pscheduler-rpm
 

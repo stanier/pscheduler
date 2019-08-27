@@ -1,6 +1,7 @@
 pscheduler-tool-iperf2 (4.2.1~a1.0-1) perfsonar-4.2-snapshot; urgency=low
 
   * New upstream version.
+  * Replacing python-ipaddr with python-ipaddress
 
  -- Antoine Delvaux <antoine.delvaux@man.poznan.pl>  Tue, 27 Aug 2019 17:33:18 +0000
 

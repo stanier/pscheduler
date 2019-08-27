@@ -14,6 +14,6 @@ Package: pscheduler-tool-iperf2
 Architecture: all
 Depends: ${misc:Depends}, python, python-pscheduler,
  pscheduler-server, pscheduler-test-throughput,
- python-ipaddr, iperf
+ python-ipaddress, iperf
 Description: pScheduler iperf2 tool
  iperf2 tool class for pScheduler

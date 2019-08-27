@@ -22,7 +22,6 @@ Provides:	%{name} = %{version}-%{release}
 
 Requires:	pscheduler-server
 Requires:	pscheduler-account
-Requires:	python-ipaddr
 Requires:	python-pscheduler
 Requires:	pscheduler-test-rtt
 Requires:	python-icmperror

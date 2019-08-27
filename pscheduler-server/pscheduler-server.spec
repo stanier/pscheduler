@@ -49,7 +49,6 @@ Requires:	curl
 Requires:	pscheduler-account
 Requires:	python-daemon
 Requires:	python-flask
-Requires:	python-ipaddr
 Requires:	python-jsontemplate
 
 # API Server

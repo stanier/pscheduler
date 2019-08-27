@@ -22,7 +22,7 @@ Provides:	%{name} = %{version}-%{release}
 
 Requires:	pscheduler-server
 Requires:	pscheduler-account
-Requires:	python-ipaddr
+Requires:	python-ipaddress
 Requires:	python-pscheduler
 Requires:	pscheduler-test-trace
 Requires:	paris-traceroute
