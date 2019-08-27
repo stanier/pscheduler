@@ -14,6 +14,6 @@ Package: pscheduler-tool-bwctliperf3
 Architecture: all
 Depends: ${misc:Depends}, python, python-pscheduler,
  pscheduler-server, pscheduler-test-throughput,
- python-ipaddr, iperf3, bwctl-client, bwctl-server
+ iperf3, bwctl-client, bwctl-server
 Description: pScheduler bwctliperf3 tool
  bwctliperf3 tool class for pScheduler
