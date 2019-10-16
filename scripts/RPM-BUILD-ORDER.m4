@@ -160,6 +160,9 @@ pscheduler-archiver-rabbitmq
 pscheduler-archiver-snmptrap		--bundle snmp
 pscheduler-archiver-syslog
 
+# Archive Formatters
+pscheduler-formatter-changenothing
+
 # Context Changers
 pscheduler-context-changefail
 pscheduler-context-changenothing

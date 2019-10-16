@@ -1219,6 +1219,25 @@ __dictionary__ = {
             ]
         },
 
+        "Formatter": {
+            "type": "object",
+            "properties": {
+                "schema":       { "$ref": "#/pScheduler/Cardinal" },
+                "name":         { "$ref": "#/pScheduler/String" },
+                "description":  { "$ref": "#/pScheduler/String" },
+                "version":      { "$ref": "#/pScheduler/Version" },
+                "maintainer":   { "$ref": "#/pScheduler/Maintainer" }
+            },
+            "additionalProperties": False,
+            "required": [
+                "name",
+                "description",
+                "version",
+                "maintainer"
+            ]
+        },
+
+
         "Context": {
             "type": "object",
             "properties": {

@@ -79,6 +79,10 @@ cat > $RPM_BUILD_ROOT/%{macro_prefix}%{name} <<EOF
 %%_pscheduler_archiver_libexec %{_pscheduler_classes}/archiver
 %%_pscheduler_archiver_doc %{_pscheduler_docdir}/archiver
 
+# Archive Formatters
+%%_pscheduler_formatter_libexec %{_pscheduler_classes}/formatter
+%%_pscheduler_formatter_doc %{_pscheduler_docdir}/formatter
+
 # Context Changers
 %%_pscheduler_context_libexec %{_pscheduler_classes}/context
 %%_pscheduler_context_doc %{_pscheduler_docdir}/context

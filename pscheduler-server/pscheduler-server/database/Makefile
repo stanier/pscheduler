@@ -33,6 +33,7 @@ FILES=\
 	tool \
 	archive_default \
 	archiver \
+	formatter \
 	context \
 	task \
 	run_state \

@@ -1,0 +1,12 @@
+#!/bin/sh -e
+#
+# Reformat by doing nothing
+#
+
+echo '{ "succeeded": true,'
+printf '"result": '
+cat
+echo
+echo '}'
+
+

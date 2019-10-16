@@ -108,6 +108,65 @@ RTT Min/Mean/Max/StdDev = \
 """
 
 
+elif format == 'application/x-pscheduler-json-simplified':
+
+   # This doesn't use JSON templating, so dump the results and exit.
+
+   try:
+      if json["succeeded"]:
+
+         # Source
+
+         try:
+            source_host = input["test"]["spec"]["source"]
+         except KeyError:
+            source_host = pscheduler.api_local_host_fqdn()
+         # TODO: Figure out hostname/IP pair for this
+         source_ip = "0.0.0.0"
+
+         # Destination
+
+         dest_host = input["test"]["spec"]["dest"]
+         # TODO: Figure out hostname/IP pair for this
+         dest_ip = "0.0.0.0"
+
+         print pscheduler.json_dump({
+
+            "meta": {
+               "dest": {
+                  "hostname": dest_host,
+                  "ip": dest_ip
+               },
+               "source": {
+                  "hostname":source_host,
+                  "ip": source_ip
+               }
+            },
+
+            "result": {
+
+               # This is what would have been the "rtt" section.
+               "max": pscheduler.iso8601_as_timedelta(json["max"]).total_seconds(),
+               "mean": pscheduler.iso8601_as_timedelta(json["mean"]).total_seconds(),
+               "min": pscheduler.iso8601_as_timedelta(json["min"]).total_seconds(),
+               "stddev": pscheduler.iso8601_as_timedelta(json["stddev"]).total_seconds(),
+
+               # This is what would have been the "packets" section.
+               "duplicates": json["duplicates"],
+               "loss-rate": float(json["lost"]) / float(json["sent"]),
+               "lost": json["lost"],
+               "received": json["received"],
+               "sent": json["sent"]
+            }
+         })
+      else:
+         pscheduler.fail("Run was not successful.")
+   except Exception as ex:
+      pscheduler.fail("Problem while generating PJS: %s" % (str(ex)))
+
+   pscheduler.succeed()
+
+
 else:
 
    pscheduler.fail("Unsupported format '%s'" % format)

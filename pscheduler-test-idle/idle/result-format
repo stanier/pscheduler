@@ -46,6 +46,23 @@ elif format == 'text/html':
 </table>
    """
 
+
+elif format == 'application/x-pscheduler-json-simplified':
+
+   # This doesn't use JSON templating, so dump the results and exit.
+
+   try:
+      if json["succeeded"]:
+         print pscheduler.json_dump({
+            "duration": pscheduler.iso8601_as_timedelta(json["duration"]).total_seconds()
+         })
+      else:
+         pscheduler.fail("Run was not successful.")
+   except Exception as ex:
+      pscheduler.fail("Problem while generating PJS: %s" % (str(ex)))
+
+   pscheduler.succeed()
+
 else:
 
    pscheduler.fail("Unsupported format '%s'" % format)
@@ -55,3 +72,5 @@ else:
 print jsontemplate.expand(
    template if json['succeeded'] else fail_template,
    json).strip()
+
+pscheduler.succeed()

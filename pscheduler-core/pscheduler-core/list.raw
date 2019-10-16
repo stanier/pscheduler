@@ -3,6 +3,7 @@
 # List instances of a pScheduler class
 #
 
+# TODO: This should probably be moved to pscheduler-server
 # This is used internally by the database during warm boot.  Nothing
 # else should need it.
 
@@ -18,7 +19,7 @@ TYPE=$1
 shift
 
 case "${TYPE}" in
-    test|tool|archiver|context)
+    test|tool|archiver|formatter|context)
 	true
 	;;
     *)
