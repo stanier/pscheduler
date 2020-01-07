@@ -569,9 +569,12 @@ class ArchiveWorker():
 
         failed = False
 
+        # Note that the double T in "formatt" avoids a reserved word.
+
         archiving_id, task_uuid, run_uuid, archiver, archiver_data, start, \
             duration, test, tool, participants, result_merged, attempts, \
-            last_attempt, transform, task_detail, run_detail, spec = self.row
+            last_attempt, formatt, transform, task_detail, run_detail, spec \
+            = self.row
 
         participants_merged = []
         for participant in participants:
@@ -642,6 +645,23 @@ class ArchiveWorker():
         json_result["task"]["href"] = task_href
         json_result["run"]["href"] = run_href
         json_result["run"]["task-href"] = task_href
+
+
+        # If there's a formatter (already validated, run it.
+
+        if formatt is not None:
+            self.log.debug("%d: Formatting input with %s",
+                           self.id, formatt["formatter"])
+            format_input = {
+                "data": formatt.get("data", {}),
+                "result": json["result"]
+            }
+
+            # TODO: Formatters need to be streaming JSON like archivers
+            # TODO: Call formatter
+            # TODO: Get Output
+            # TODO: If null, bail out like for transform
+            json["result"] = {"TODO": "TODO"}
 
         # If there's a transform (already validated), do it.
 
@@ -881,7 +901,7 @@ def main_program():
         result = db.query("""SELECT id, task_uuid, run_uuid, archiver,
                              archiver_data, start,
                              duration, test, tool, participants, result,
-                             attempts, last_attempt, transform, task_detail, run_detail,
+                             attempts, last_attempt, format, transform, task_detail, run_detail,
                              spec
                              FROM archiving_next(%s)""",
                           [options.max_parallel])

@@ -266,6 +266,23 @@ def tasks():
             except Exception as ex:
                 return error("Internal probelm validating archiver data: %s" % (str(ex)))
 
+            # Formatter, if there was one.
+
+            if "format" in archive:
+                # Identifier dodges a reserved word.
+                formatt = archive["format"]
+                try:
+                    returncode, stdout, stderr = pscheduler.run_program(
+                        [ "pscheduler", "internal", "invoke", "formatter",
+                          formatt["formatter"], "data-is-valid" ],
+                        stdin=pscheduler.json_dump(formatt["data"]),
+                    )
+                    if returncode != 0:
+                        return error("Unable to validate formatter data: %s" % (stderr))
+                except Exception as ex:
+                    return error("Unable to validate formatter spec: " + str(ex))
+
+
             # Transform, if there was one.
 
             if "transform" in archive:

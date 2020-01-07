@@ -1,12 +1,42 @@
-#!/bin/sh -e
-#
-# Reformat by doing nothing
-#
+#!/usr/bin/python
+"""
+Format a result by doing nothing
+"""
 
-echo '{ "succeeded": true,'
-printf '"result": '
-cat
-echo
-echo '}'
+import datetime
+import pscheduler
+import sys
 
 
+
+MAX_SCHEMA = 1
+
+log_prefix="formatter-changenothing"
+
+log = pscheduler.Log(prefix=log_prefix, quiet=True)
+
+
+def archive(json):
+
+    data = json["data"]
+    result = json["result"]
+
+    schema = data.get("schema", 1)
+    if schema > MAX_SCHEMA:
+        return {
+            "succeeded": False,
+            "error": "Unsupported schema version %d; max is %d" % (
+                schema, MAX_SCHEMA)
+        }
+
+    return result
+
+
+
+PARSER = pscheduler.RFC7464Parser(sys.stdin)
+EMITTER = pscheduler.RFC7464Emitter(sys.stdout)
+
+for parsed in PARSER:
+    EMITTER(archive(parsed))
+
+pscheduler.succeed()

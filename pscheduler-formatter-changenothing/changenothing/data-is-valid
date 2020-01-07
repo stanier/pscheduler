@@ -14,10 +14,12 @@ except ValueError as ex:
         })
 
 data_validator = {
-
     "type": "object",
     "properties": {
-        "schema": { "$ref": "#/pScheduler/Cardinal" }
+        "schema": {
+            "type": "integer",
+            "enum": [ 1 ]
+        }
     },
     "additionalProperties": False
 }

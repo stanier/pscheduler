@@ -446,6 +446,23 @@ __dictionary__ = {
     # Compound Types
     #
 
+    "ArchiveFormatSpecification": {
+        "type": "object",
+        "properties": {
+            "schema": {
+                "type": "integer",
+                "enum": [ 1 ]
+            },
+            "formatter": { "type": "string" },
+            "data": { "$ref": "#/pScheduler/AnyJSON" }
+        },
+        "additionalProperties": False,
+        "required": [
+            "formatter",
+            "data",
+        ]
+    },
+
     "ArchiveSpecification_V1": {
         "type": "object",
         "properties": {
@@ -494,10 +511,41 @@ __dictionary__ = {
             ]
         },
 
+    "ArchiveSpecification_V3": {
+        "type": "object",
+        "properties": {
+            "schema": {
+                "type": "integer",
+                "enum": [ 3 ]
+            },
+            "runs": {
+                "type": "string",
+                "enum": [
+                    "all",
+                    "succeeded",
+                    "failed"
+                    ]
+            },
+            "archiver": { "type": "string" },
+            "data": { "$ref": "#/pScheduler/AnyJSON" },
+            "format": { "$ref": "#/pScheduler/ArchiveFormatSpecification" },
+            "transform": { "$ref": "#/pScheduler/JQTransformSpecification" },
+            "ttl": { "$ref": "#/pScheduler/Duration" },
+            "uri-host": { "$ref": "#/pScheduler/URLHostPort" }
+            },
+        "additionalProperties": False,
+        "required": [
+            "schema",
+            "archiver",
+            "data",
+            ]
+        },
+
     "ArchiveSpecification": {
         "anyOf": [
             { "$ref": "#/pScheduler/ArchiveSpecification_V1" },
-            { "$ref": "#/pScheduler/ArchiveSpecification_V2" }
+            { "$ref": "#/pScheduler/ArchiveSpecification_V2" },
+            { "$ref": "#/pScheduler/ArchiveSpecification_V3" },
             ]
         },
 

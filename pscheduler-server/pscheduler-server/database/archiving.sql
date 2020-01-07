@@ -174,6 +174,18 @@ BEGIN
     END IF;
 
 
+    -- Version 8 to version 9
+    -- Adds formatt
+    IF t_version = 8
+    THEN
+        ALTER TABLE archiving ADD COLUMN
+        format JSON;
+
+        t_version := t_version + 1;
+    END IF;
+
+
+
     --
     -- Cleanup
     --
@@ -263,12 +275,13 @@ BEGIN
 	                     ELSE NULL
 	                     END)
 	    THEN
-	        INSERT INTO archiving (run, archiver, archiver_data, ttl_expires, transform, spec)
+	        INSERT INTO archiving (run, archiver, archiver_data, ttl_expires, format, transform, spec)
     	        VALUES (
     	            NEW.id,
     	            (SELECT id from archiver WHERE name = archive #>> '{archiver}'),
 	            (archive #> '{data}')::JSONB,
 	            expires,
+		    (archive #> '{format}'),
 		    (archive #> '{transform}'),
 		    archive
     	        );
@@ -346,6 +359,7 @@ RETURNS TABLE (
     result JSONB,
     attempts INTEGER,
     last_attempt TIMESTAMP WITH TIME ZONE,
+    format JSON,
     transform JSON,
     task_detail JSONB,
     run_detail JSONB,
@@ -370,6 +384,7 @@ BEGIN
         run.result_merged AS result,
         archiving.attempts AS attempts,
         archiving.last_attempt AS last_attempt,
+	archiving.format AS format,
 	archiving.transform AS transform,
 	-- TODO: This covers a number of things above.  Remove the
 	-- redundancies here and in the archiver.
