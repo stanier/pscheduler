@@ -84,6 +84,7 @@ httpd-wsgi-socket
 # Utility and Tool programs
 #
 drop-in
+ethr
 paris-traceroute
 random-string
 
